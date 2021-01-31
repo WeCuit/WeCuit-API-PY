@@ -1,0 +1,19 @@
+FROM python:3.6.12-alpine3.12
+
+USER root
+
+WORKDIR /vercode
+
+COPY requirements.txt requirements.txt
+
+# pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+RUN echo -e "https://mirrors.tuna.tsinghua.edu.cn/alpine/v3.12/main/\nhttps://mirrors.tuna.tsinghua.edu.cn/alpine/v3.12/community/" > /etc/apk/repositories\
+    && apk add --no-cache make cmake gcc g++ gfortran\
+    && pip install --upgrade pip -i https://mirrors.cloud.tencent.com/pypi/simple\
+    && pip install scikit-build gunicorn gevent -i https://mirrors.cloud.tencent.com/pypi/simple \
+    && pip install -r requirements.txt -i https://mirrors.cloud.tencent.com/pypi/simple \
+    && echo ok
+    # yum install mesa-libGL.x86_64 -y
+
+EXPOSE 4006
+CMD ["gunicorn", "run:app", "-c", "./gunicorn.conf.py"]
